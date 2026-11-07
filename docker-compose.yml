@@ -1,0 +1,135 @@
+services:
+  postgres-db:
+    image: postgres:15-alpine
+    container_name: gt_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gestor_testes}
+      POSTGRES_USER: ${POSTGRES_USER:-gt_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gt_secure_password}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-gt_admin} -d $${POSTGRES_DB:-gestor_testes}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - gt_network
+
+  api-gateway:
+    build: ./gateway
+    container_name: gt_gateway
+    restart: unless-stopped
+    environment:
+      PORT: 8000
+      AUTH_SERVICE_URL: http://auth-service:5001
+      PROJECT_SERVICE_URL: http://project-service:5002
+      TEST_EXECUTION_SERVICE_URL: http://test-execution-service:5003
+      STORAGE_SERVICE_URL: http://storage-service:5004
+      JWT_SECRET: ${JWT_SECRET:-super_jwt_secret_token}
+    volumes:
+      - ./gateway/src:/app/src
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-service
+      - project-service
+      - test-execution-service
+      - storage-service
+    networks:
+      - gt_network
+
+  auth-service:
+    build: ./services/auth-service
+    container_name: gt_auth_service
+    restart: unless-stopped
+    environment:
+      PORT: 5001
+      DATABASE_URL: postgres://${POSTGRES_USER:-gt_admin}:${POSTGRES_PASSWORD:-gt_secure_password}@postgres-db:5432/${POSTGRES_DB:-gestor_testes}
+      JWT_SECRET: ${JWT_SECRET:-super_jwt_secret_token}
+    volumes:
+      - ./services/auth-service/src:/app/src
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - gt_network
+
+  project-service:
+    build: ./services/project-service
+    container_name: gt_project_service
+    restart: unless-stopped
+    environment:
+      PORT: 5002
+      DATABASE_URL: postgres://${POSTGRES_USER:-gt_admin}:${POSTGRES_PASSWORD:-gt_secure_password}@postgres-db:5432/${POSTGRES_DB:-gestor_testes}
+    volumes:
+      - ./services/project-service/src:/app/src
+    ports:
+      - "5002:5002"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - gt_network
+
+  test-execution-service:
+    build: ./services/test-execution-service
+    container_name: gt_test_execution_service
+    restart: unless-stopped
+    environment:
+      PORT: 5003
+      DATABASE_URL: postgres://${POSTGRES_USER:-gt_admin}:${POSTGRES_PASSWORD:-gt_secure_password}@postgres-db:5432/${POSTGRES_DB:-gestor_testes}
+    volumes:
+      - ./services/test-execution-service/src:/app/src
+    ports:
+      - "5003:5003"
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    networks:
+      - gt_network
+
+  storage-service:
+    build: ./services/storage-service
+    container_name: gt_storage_service
+    restart: unless-stopped
+    environment:
+      PORT: 5004
+      STORAGE_VOLUME_PATH: /var/app/uploads
+    volumes:
+      - local_storage:/var/app/uploads
+      - ./services/storage-service/src:/app/src
+    ports:
+      - "5004:5004"
+    networks:
+      - gt_network
+
+  frontend-app:
+    build: ./frontend
+    container_name: gt_frontend
+    restart: unless-stopped
+    environment:
+      PORT: 3000
+      VITE_API_GATEWAY_URL: http://localhost:8000/api/v1
+    volumes:
+      - ./frontend/src:/app/src
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api-gateway
+    networks:
+      - gt_network
+
+volumes:
+  pgdata:
+  local_storage:
+
+networks:
+  gt_network:
+    driver: bridge
