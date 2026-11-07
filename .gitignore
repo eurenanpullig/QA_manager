@@ -1,0 +1,64 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp
+.pnp.js
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+**/.env
+**/.env.*
+!.env.example
+!**/.env.example
+
+# Build & compilation outputs
+dist/
+build/
+out/
+**/dist/
+**/build/
+*.tsbuildinfo
+
+# Storage & Uploads (keep directory structure via .gitkeep)
+storage-volume/*
+!storage-volume/.gitkeep
+uploads/
+**/uploads/*
+!**/uploads/.gitkeep
+*.tmp
+*.part
+
+# Logs & Runtime data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Testing & Coverage
+coverage/
+**/coverage/
+.nyc_output/
+cypress/videos/
+cypress/screenshots/
+robot-results/
+output.xml
+log.html
+report.html
+
+# IDE & OS files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
