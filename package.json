@@ -1,0 +1,32 @@
+{
+  "name": "gestor-testes-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Sistema Corporativo de Gestão de Testes (Self-Hosted Monorepo)",
+  "workspaces": [
+    "gateway",
+    "services/*",
+    "frontend"
+  ],
+  "scripts": {
+    "lint": "eslint \"gateway/src/**/*.{ts,tsx,js,jsx}\" \"services/*/src/**/*.{ts,tsx,js,jsx}\" \"frontend/src/**/*.{ts,tsx,js,jsx}\" --max-warnings=0",
+    "lint:fix": "eslint \"gateway/src/**/*.{ts,tsx,js,jsx}\" \"services/*/src/**/*.{ts,tsx,js,jsx}\" \"frontend/src/**/*.{ts,tsx,js,jsx}\" --fix",
+    "format": "prettier --write \"gateway/src/**/*.{ts,tsx,js,jsx,json}\" \"services/*/src/**/*.{ts,tsx,js,jsx,json}\" \"frontend/src/**/*.{ts,tsx,js,jsx,json}\"",
+    "format:check": "prettier --check \"gateway/src/**/*.{ts,tsx,js,jsx,json}\" \"services/*/src/**/*.{ts,tsx,js,jsx,json}\" \"frontend/src/**/*.{ts,tsx,js,jsx,json}\""
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
+    "eslint": "^9.14.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "globals": "^15.11.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
