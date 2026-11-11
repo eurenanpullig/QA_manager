@@ -345,6 +345,17 @@ app.post('/api/v1/tests/suites/runs/:run_id/resume', handleResumeSuiteRun);
 // =============================================================================
 // [2.5.4] Immutable Append-Only Test Executions
 // =============================================================================
+app.get('/api/v1/tests/executions', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    getUserContext(req);
+    const limit = typeof req.query.limit === 'string' ? Number(req.query.limit) : 50;
+    const executions = await repo.listRecentExecutions(Number.isFinite(limit) ? limit : 50);
+    res.status(200).json({ executions });
+  } catch (err) {
+    next(err);
+  }
+});
+
 app.post('/api/v1/tests/executions', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId } = requireTestExecutionOrMutationRole(req);

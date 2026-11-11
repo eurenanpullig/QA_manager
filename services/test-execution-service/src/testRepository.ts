@@ -670,6 +670,43 @@ export class TestExecutionRepository {
     return { execution, evidences: evRes.rows };
   }
 
+  public async listRecentExecutions(limit = 50): Promise<
+    Array<
+      ExecutionRecord & {
+        scenario_title: string;
+        active_evidence_count: number;
+        total_evidence_count: number;
+      }
+    >
+  > {
+    const safeLimit = Math.min(Math.max(1, limit), 100);
+    const res = await pool.query<
+      ExecutionRecord & {
+        scenario_title: string;
+        active_evidence_count: string;
+        total_evidence_count: string;
+      }
+    >(
+      `SELECT e.*,
+              COALESCE(s.title, 'Cenário') AS scenario_title,
+              COUNT(ev.id) FILTER (WHERE ev.is_active = TRUE) AS active_evidence_count,
+              COUNT(ev.id) AS total_evidence_count
+       FROM executions e
+       LEFT JOIN scenarios s ON s.id = e.scenario_id
+       LEFT JOIN execution_evidences ev ON ev.execution_id = e.id
+       GROUP BY e.id, s.title
+       ORDER BY e.executed_at DESC
+       LIMIT $1`,
+      [safeLimit],
+    );
+
+    return res.rows.map((r) => ({
+      ...r,
+      active_evidence_count: Number(r.active_evidence_count),
+      total_evidence_count: Number(r.total_evidence_count),
+    }));
+  }
+
   // ===========================================================================
   // [2.5.5] Leader Evidence Superseding & Audit Trail (PATCH /executions/:id/evidences)
   // ===========================================================================
