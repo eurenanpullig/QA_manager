@@ -9,6 +9,7 @@ import { AdminUsersPage } from './pages/AdminUsersPage.js';
 import { GherkinEditorPage } from './pages/GherkinEditorPage.js';
 import { HierarchyPage } from './pages/HierarchyPage.js';
 import { LoginPage } from './pages/LoginPage.js';
+import { SuitesOrchestratorPage } from './pages/SuitesOrchestratorPage.js';
 import './styles/tokens.css';
 
 const AuthenticatedWorkspace: React.FC = () => {
@@ -65,15 +66,17 @@ const AuthenticatedWorkspace: React.FC = () => {
         <GherkinEditorPage initialFeature={selectedFeatureForGherkin} />
       ) : null}
 
+      {activeNavId === 'suites' ? <SuitesOrchestratorPage /> : null}
+
       {activeNavId === 'admin-users' ? (
         <GuardedRoute allowedRoles={['ADM']}>
           <AdminUsersPage />
         </GuardedRoute>
       ) : null}
 
-      {activeNavId !== 'hierarchy' && activeNavId !== 'gherkin' && activeNavId !== 'admin-users' ? (
+      {activeNavId === 'audit' ? (
         <section className="gt-card">
-          <h2 style={{ marginTop: 0 }}>Módulo: {activeNavId}</h2>
+          <h2 style={{ marginTop: 0 }}>Auditoria & Relatórios PDF</h2>
         </section>
       ) : null}
     </AppShell>
