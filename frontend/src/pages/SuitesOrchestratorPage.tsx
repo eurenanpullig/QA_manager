@@ -283,15 +283,15 @@ export const SuitesOrchestratorPage: React.FC = () => {
         evidences: uploadedEvidences,
       });
 
+      if (activeRun) {
+        await handleResumeSuiteRun(activeRun.id);
+      }
+
       const createdExecId = res.data.execution.id;
       setLastExecutionId(createdExecId);
       localStorage.setItem('gt_last_execution_id', createdExecId);
       setFeedbackSuccess(`Execução imutável registrada (${execStatus}) — ID: ${createdExecId}`);
       setExecModalScenario(null);
-
-      if (activeRun) {
-        await handleResumeSuiteRun(activeRun.id);
-      }
     } catch (err) {
       setFeedbackError(err instanceof ApiClientError ? err.message : 'Falha ao gravar execução.');
     }

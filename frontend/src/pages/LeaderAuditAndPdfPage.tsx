@@ -23,7 +23,7 @@ interface ExecutionRecord {
   duration_ms: number;
   rationale: string | null;
   executed_by: string;
-  executed_at: string;
+  created_at: string;
   scenario_title?: string;
   active_evidence_count?: number;
   total_evidence_count?: number;
@@ -119,10 +119,11 @@ export const LeaderAuditAndPdfPage: React.FC = () => {
       }
 
       const savedExecId = window.localStorage.getItem('gt_last_execution_id');
+      const firstWithEvidence = execList.find((e) => (e.active_evidence_count ?? 0) > 0);
       const targetId =
         savedExecId && execList.some((e) => e.id === savedExecId)
           ? savedExecId
-          : (execList[0]?.id ?? '');
+          : (firstWithEvidence?.id ?? execList[0]?.id ?? '');
 
       if (targetId) {
         setSelectedExecutionId(targetId);
@@ -158,22 +159,18 @@ export const LeaderAuditAndPdfPage: React.FC = () => {
       formData.append('file', file);
 
       const res = await apiClient.post<{
-        file: {
-          filename: string;
-          originalName: string;
-          mimeType: string;
-          sizeBytes: number;
-          filePath: string;
-        };
+        file_path: string;
+        file_type: string;
+        file_size_bytes: number;
       }>('/storage/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       setUploadedReplacement({
-        file_path: res.data.file.filePath,
-        file_type: res.data.file.mimeType,
-        file_size_bytes: res.data.file.sizeBytes,
-        original_name: res.data.file.originalName,
+        file_path: res.data.file_path,
+        file_type: res.data.file_type,
+        file_size_bytes: res.data.file_size_bytes,
+        original_name: file.name,
       });
     } catch (err) {
       setErrorBanner(getErrorMessage(err));
@@ -459,7 +456,7 @@ export const LeaderAuditAndPdfPage: React.FC = () => {
               {executions.map((ex) => (
                 <option key={ex.id} value={ex.id}>
                   [{ex.status}] {ex.scenario_title ?? ex.scenario_id} —{' '}
-                  {new Date(ex.executed_at).toLocaleString('pt-BR')}
+                  {new Date(ex.created_at).toLocaleString('pt-BR')}
                 </option>
               ))}
             </select>

@@ -695,7 +695,7 @@ export class TestExecutionRepository {
        LEFT JOIN scenarios s ON s.id = e.scenario_id
        LEFT JOIN execution_evidences ev ON ev.execution_id = e.id
        GROUP BY e.id, s.title
-       ORDER BY e.executed_at DESC
+       ORDER BY e.created_at DESC
        LIMIT $1`,
       [safeLimit],
     );
