@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext.js';
 import { ThemeProvider } from './contexts/ThemeContext.js';
 import { useAuth } from './hooks/useAuth.js';
 import { AdminUsersPage } from './pages/AdminUsersPage.js';
+import { GherkinEditorPage } from './pages/GherkinEditorPage.js';
 import { HierarchyPage } from './pages/HierarchyPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import './styles/tokens.css';
@@ -13,6 +14,12 @@ import './styles/tokens.css';
 const AuthenticatedWorkspace: React.FC = () => {
   const { user, loading, logout, savePreferences } = useAuth();
   const [activeNavId, setActiveNavId] = useState<string>('hierarchy');
+  const [selectedFeatureForGherkin, setSelectedFeatureForGherkin] = useState<{
+    id: string;
+    name: string;
+    projectId: string;
+    projectName: string;
+  } | null>(null);
 
   if (loading) {
     return (
@@ -27,7 +34,8 @@ const AuthenticatedWorkspace: React.FC = () => {
   }
 
   const navItems = [
-    { id: 'hierarchy', label: 'Hierarquia & Cenários' },
+    { id: 'hierarchy', label: 'Hierarquia Funcional' },
+    { id: 'gherkin', label: 'Editor Gherkin & Versões' },
     { id: 'suites', label: 'Suítes & Execuções' },
     { id: 'audit', label: 'Auditoria & Relatórios PDF', badge: 'Líder' },
     ...(user.role === 'ADM'
@@ -44,7 +52,18 @@ const AuthenticatedWorkspace: React.FC = () => {
       onLogout={() => void logout()}
       onPersistPreferences={(theme, scale) => void savePreferences(theme, scale)}
     >
-      {activeNavId === 'hierarchy' ? <HierarchyPage /> : null}
+      {activeNavId === 'hierarchy' ? (
+        <HierarchyPage
+          onSelectFeatureForGherkin={(feat) => {
+            setSelectedFeatureForGherkin(feat);
+            setActiveNavId('gherkin');
+          }}
+        />
+      ) : null}
+
+      {activeNavId === 'gherkin' ? (
+        <GherkinEditorPage initialFeature={selectedFeatureForGherkin} />
+      ) : null}
 
       {activeNavId === 'admin-users' ? (
         <GuardedRoute allowedRoles={['ADM']}>
@@ -52,7 +71,7 @@ const AuthenticatedWorkspace: React.FC = () => {
         </GuardedRoute>
       ) : null}
 
-      {activeNavId !== 'hierarchy' && activeNavId !== 'admin-users' ? (
+      {activeNavId !== 'hierarchy' && activeNavId !== 'gherkin' && activeNavId !== 'admin-users' ? (
         <section className="gt-card">
           <h2 style={{ marginTop: 0 }}>Módulo: {activeNavId}</h2>
         </section>
