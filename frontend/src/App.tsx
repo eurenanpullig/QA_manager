@@ -8,6 +8,7 @@ import { useAuth } from './hooks/useAuth.js';
 import { AdminUsersPage } from './pages/AdminUsersPage.js';
 import { GherkinEditorPage } from './pages/GherkinEditorPage.js';
 import { HierarchyPage } from './pages/HierarchyPage.js';
+import { LeaderAuditAndPdfPage } from './pages/LeaderAuditAndPdfPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import { SuitesOrchestratorPage } from './pages/SuitesOrchestratorPage.js';
 import './styles/tokens.css';
@@ -74,11 +75,7 @@ const AuthenticatedWorkspace: React.FC = () => {
         </GuardedRoute>
       ) : null}
 
-      {activeNavId === 'audit' ? (
-        <section className="gt-card">
-          <h2 style={{ marginTop: 0 }}>Auditoria & Relatórios PDF</h2>
-        </section>
-      ) : null}
+      {activeNavId === 'audit' ? <LeaderAuditAndPdfPage /> : null}
     </AppShell>
   );
 };
