@@ -1,32 +1,70 @@
 import React, { useState } from 'react';
 
 import { AppShell } from './components/AppShell.js';
+import { GuardedRoute } from './components/GuardedRoute.js';
+import { AuthProvider } from './contexts/AuthContext.js';
 import { ThemeProvider } from './contexts/ThemeContext.js';
+import { useAuth } from './hooks/useAuth.js';
+import { AdminUsersPage } from './pages/AdminUsersPage.js';
+import { LoginPage } from './pages/LoginPage.js';
 import './styles/tokens.css';
 
-export const App: React.FC = () => {
-  const [activeNavId, setActiveNavId] = useState('hierarchy');
+const AuthenticatedWorkspace: React.FC = () => {
+  const { user, loading, logout, savePreferences } = useAuth();
+  const [activeNavId, setActiveNavId] = useState<string>('hierarchy');
+
+  if (loading) {
+    return (
+      <div style={{ padding: '2rem', textAlign: 'center' }} data-testid="auth-loading">
+        Carregando sessão segura...
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <LoginPage />;
+  }
+
+  const navItems = [
+    { id: 'hierarchy', label: 'Hierarquia & Cenários' },
+    { id: 'suites', label: 'Suítes & Execuções' },
+    { id: 'audit', label: 'Auditoria & Relatórios PDF', badge: 'Líder' },
+    ...(user.role === 'ADM'
+      ? [{ id: 'admin-users', label: 'Gestão de Usuários', badge: 'ADM' }]
+      : []),
+  ];
 
   return (
-    <ThemeProvider>
-      <AppShell
-        navItems={[
-          { id: 'hierarchy', label: 'Hierarquia & Cenários' },
-          { id: 'suites', label: 'Suítes & Execuções' },
-          { id: 'audit', label: 'Auditoria & Relatórios PDF' },
-        ]}
-        activeNavId={activeNavId}
-        onSelectNav={setActiveNavId}
-      >
+    <AppShell
+      navItems={navItems}
+      activeNavId={activeNavId}
+      onSelectNav={setActiveNavId}
+      userSummary={{ name: user.name, role: user.role }}
+      onLogout={() => void logout()}
+      onPersistPreferences={(theme, scale) => void savePreferences(theme, scale)}
+    >
+      {activeNavId === 'admin-users' ? (
+        <GuardedRoute allowedRoles={['ADM']}>
+          <AdminUsersPage />
+        </GuardedRoute>
+      ) : null}
+
+      {activeNavId !== 'admin-users' ? (
         <section className="gt-card">
-          <h1 style={{ marginTop: 0 }}>Fundação Visual Material Design (Step 3.1)</h1>
-          <p>
-            Layout Mobile First com zero cantos de 90° (<code>border-radius &gt;= 8px</code>),
-            suporte a temas Dark/Light (WCAG 2.1 AA) e escala tipográfica dinâmica no elemento raiz{' '}
-            <code>html</code>.
-          </p>
+          <h2 style={{ marginTop: 0 }}>Sessão Autenticada ({user.role})</h2>
+          <p>Módulo ativo: {activeNavId}</p>
         </section>
-      </AppShell>
+      ) : null}
+    </AppShell>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <AuthenticatedWorkspace />
+      </AuthProvider>
     </ThemeProvider>
   );
 };
