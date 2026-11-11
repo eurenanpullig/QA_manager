@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext.js';
 import { ThemeProvider } from './contexts/ThemeContext.js';
 import { useAuth } from './hooks/useAuth.js';
 import { AdminUsersPage } from './pages/AdminUsersPage.js';
+import { HierarchyPage } from './pages/HierarchyPage.js';
 import { LoginPage } from './pages/LoginPage.js';
 import './styles/tokens.css';
 
@@ -43,16 +44,17 @@ const AuthenticatedWorkspace: React.FC = () => {
       onLogout={() => void logout()}
       onPersistPreferences={(theme, scale) => void savePreferences(theme, scale)}
     >
+      {activeNavId === 'hierarchy' ? <HierarchyPage /> : null}
+
       {activeNavId === 'admin-users' ? (
         <GuardedRoute allowedRoles={['ADM']}>
           <AdminUsersPage />
         </GuardedRoute>
       ) : null}
 
-      {activeNavId !== 'admin-users' ? (
+      {activeNavId !== 'hierarchy' && activeNavId !== 'admin-users' ? (
         <section className="gt-card">
-          <h2 style={{ marginTop: 0 }}>Sessão Autenticada ({user.role})</h2>
-          <p>Módulo ativo: {activeNavId}</p>
+          <h2 style={{ marginTop: 0 }}>Módulo: {activeNavId}</h2>
         </section>
       ) : null}
     </AppShell>
