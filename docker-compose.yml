@@ -119,6 +119,8 @@ services:
       VITE_API_GATEWAY_URL: http://localhost:8000/api/v1
     volumes:
       - ./frontend/src:/app/src
+      - ./frontend/index.html:/app/index.html
+      - ./frontend/vite.config.ts:/app/vite.config.ts
     ports:
       - "3000:3000"
     depends_on:
